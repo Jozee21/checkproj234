@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ball Bounce with Upward Start</title>
+    <style>
+        canvas {
+            background: lightgray;
+            display: block;
+            margin: auto;
+            border: 2px solid black;
+        }
+        #gridInfo {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="gridInfo">Ball is in Row: ?, Column: ?</div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const gridInfo = document.getElementById("gridInfo");
+
+        canvas.width = 500;
+        canvas.height = 500;
+        const gridSize = 5;
+        const cellSize = canvas.width / gridSize;
+
+        function getRandom(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 15,
+            vx: getRandom(-5, 5),
+            vy: getRandom(-7, 7), // Can start moving UP or DOWN
+            speedDecay: 0.996, // Slow decay per frame (~2-3 seconds to stop)
+            minSpeed: 0.5, // When both speeds drop below this, the ball stops
+            totalTime: 0, // Track time elapsed
+            maxTime: 2500 // Stops in ~2.5 seconds
+        };
+
+        function drawGrid() {
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2;
+            for (let i = 0; i <= gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * cellSize, 0);
+                ctx.lineTo(i * cellSize, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i * cellSize);
+                ctx.lineTo(canvas.width, i * cellSize);
+                ctx.stroke();
+            }
+        }
+
+        function drawBall() {
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function updateBall(deltaTime) {
+            if (ball.totalTime >= ball.maxTime) {
+                ball.vx = 0;
+                ball.vy = 0;
+                return;
+            }
+
+            ball.totalTime += deltaTime;
+
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            // Bounce off walls
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+                ball.vx *= -getRandom(0.85, 0.95);
+                ball.vy *= getRandom(0.9, 1.1);
+            }
+
+            // Bounce off floor or ceiling
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.vy *= -getRandom(0.85, 0.95);
+                ball.vx *= getRandom(0.9, 1.1);
+            }
+
+            // Gradual speed decay
+            ball.vx *= ball.speedDecay;
+            ball.vy *= ball.speedDecay;
+
+            // Stop ball if it's too slow
+            if (Math.abs(ball.vx) < ball.minSpeed && Math.abs(ball.vy) < ball.minSpeed) {
+                ball.vx = 0;
+                ball.vy = 0;
+            }
+
+            // Update grid location
+            let col = Math.floor(ball.x / cellSize) + 1;
+            let row = Math.floor(ball.y / cellSize) + 1;
+            gridInfo.textContent = `Ball is in Row: ${row}, Column: ${col}`;
+        }
+
+        let lastTime = performance.now();
+        function animate() {
+            let currentTime = performance.now();
+            let deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            updateBall(deltaTime);
+            drawBall();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
