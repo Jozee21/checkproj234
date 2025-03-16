@@ -1,0 +1,81 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1d4f23;
+    background-image: url("http://transparenttextures.com/patterns/45-degree-fabric-light.png");
+    color: white;
+    text-align: center;
+}
+.menu {
+    border: solid 3px #913f00;
+    background-color: #913f00;
+    background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+    display: inline-grid;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px;
+    border-radius: 15px;
+    float: left;
+    margin-left: 30px;
+}
+.other-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* margin: 0; */
+    flex-wrap: wrap;
+}
+.menu input {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 15px;
+    border: solid 3px #913f00;
+    font-size: 14px;
+    text-align: center;
+}
+.menu p {
+    font-size: 20px;
+    margin: 5px;
+}
+button {
+    background: linear-gradient(to bottom, #b14d00, #913f00);
+    color: white;
+    border: solid 3px #913f00;
+    padding: 5px 15px;
+    font-size: 16px;
+    margin: 5px;
+    border-radius: 15px;
+    cursor: pointer;
+}
+.card { /* Cards Styling Beyond This Point */
+    width: 90px;
+    height: 120px;
+    border-radius: 10px;
+    /* margin: 15px; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 55px;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+.card:hover {
+    box-shadow: 0 0 30px black;
+    transform: scale(1.25);
+}
+#cards {
+    margin: 135px;
+    display: grid;
+    gap: 45px 50px;
+    grid-template-columns: repeat(auto-fill, 70px);
+    /* flex-wrap: wrap; */
+    /* justify-content: center; */
+}
+.red {
+    background-color: #e74c3c;
+    color: white;
+}
+.white {
+    background-color: #fff;
+    color: black;
+}

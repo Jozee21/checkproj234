@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ball Bounce with Ordered Card Grid</title>
+    <style>
+        canvas {
+            background: lightgray;
+            display: block;
+            margin: auto;
+            border: 2px solid black;
+        }
+        #gridInfo {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="gridInfo">Ball is in Row: ?, Column: ? | Card: ?</div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const gridInfo = document.getElementById("gridInfo");
+
+        canvas.width = 500;
+        canvas.height = 500;
+        const gridSize = 5;
+        const cellSize = canvas.width / gridSize;
+
+        function getRandom(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 15,
+            vx: getRandom(-5, 5),
+            vy: getRandom(-7, 7),
+            speedDecay: 0.996,
+            minSpeed: 0.5,
+            totalTime: 0,
+            maxTime: 2500
+        };
+
+        const suits = ['♠', '♣', '♥', '♦'];
+        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+
+        function generateOrderedCardGrid() {
+            let deck = [];
+            for (let i = 0; i < values.length * 2; i++) {
+                const orderColor = i > 12 ? 'white' : 'red';
+                const orderSuit = i % suits.length;
+                const orderValue = i % 13;
+                deck.push({
+                    color: orderColor,
+                    suit: suits[orderSuit],
+                    value: values[orderValue]
+                });
+            }
+            return deck.slice(0, gridSize * gridSize); // Select first 25 cards
+        }
+
+        let cardGrid = generateOrderedCardGrid();
+
+        function drawGrid() {
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2;
+            for (let i = 0; i <= gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * cellSize, 0);
+                ctx.lineTo(i * cellSize, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i * cellSize);
+                ctx.lineTo(canvas.width, i * cellSize);
+                ctx.stroke();
+            }
+
+            ctx.font = "20px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    let card = cardGrid[row * gridSize + col];
+                    let x = col * cellSize + cellSize / 2;
+                    let y = row * cellSize + cellSize / 2;
+
+                    ctx.fillStyle = card.color === "red" ? "red" : "black";
+                    ctx.fillText(`${card.value}${card.suit}`, x, y);
+                }
+            }
+        }
+
+        function drawBall() {
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function updateBall(deltaTime) {
+            if (ball.totalTime >= ball.maxTime) {
+                ball.vx = 0;
+                ball.vy = 0;
+                return;
+            }
+
+            ball.totalTime += deltaTime;
+
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+                ball.vx *= -getRandom(0.85, 0.95);
+                ball.vy *= getRandom(0.9, 1.1);
+            }
+
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.vy *= -getRandom(0.85, 0.95);
+                ball.vx *= getRandom(0.9, 1.1);
+            }
+
+            ball.vx *= ball.speedDecay;
+            ball.vy *= ball.speedDecay;
+
+            if (Math.abs(ball.vx) < ball.minSpeed && Math.abs(ball.vy) < ball.minSpeed) {
+                ball.vx = 0;
+                ball.vy = 0;
+            }
+
+            let col = Math.floor(ball.x / cellSize);
+            let row = Math.floor(ball.y / cellSize);
+            let landedCard = cardGrid[row * gridSize + col];
+
+            gridInfo.textContent = `Ball is in Row: ${row + 1}, Column: ${col + 1} | Card: ${landedCard.value}${landedCard.suit}`;
+        }
+
+        let lastTime = performance.now();
+        function animate() {
+            let currentTime = performance.now();
+            let deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            updateBall(deltaTime);
+            drawBall();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
