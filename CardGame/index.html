@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <canvas id="DropBallCanvas"></canvas>
   <section id="cards">
   </section>
   <section class="menu">
@@ -18,9 +19,18 @@
     <div class="menu-info-container">
       <div>Your card: <strong><span id="betcard"></span></strong></div>
       <div>Your bet: <strong><span id="betamount"></span></strong></div>
-      <div>Your Winnings: <strong><span id="balanceamount"></span></strong></div>
+      <div>Balance: <strong><span id="balanceamount"></span></strong></div>
+      <div><button id="shuffle">Shuffle Cards</button></div>
     </div>
   </section>
+
+<div id="popupDialog">
+  <div class="popupDialog-content">
+    <span class="close">&times;</span>
+    <h1 id="popupDialog-text">Some text in the Modal..</h1>
+  </div>
+</div>
+  
   <script src="script.js"></script>
 </body>
 </html>

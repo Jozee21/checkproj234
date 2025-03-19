@@ -5,24 +5,19 @@ body {
     color: white;
     text-align: center;
 }
+canvas {
+    margin-left: 90px;
+    margin-top: 50px;
+    margin-bottom: 135px;
+}
 .menu {
     border: solid 3px #913f00;
     background-color: #913f00;
     background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
     display: inline-grid;
-    justify-content: flex-start;
-    align-items: center;
     padding: 10px;
     border-radius: 15px;
-    float: left;
-    margin: 20% 0 0 150px;
-}
-.other-buttons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* margin: 0; */
-    flex-wrap: wrap;
+    margin-top: 38%;
 }
 .menu input {
     padding: 10px;
@@ -39,7 +34,6 @@ button {
     padding: 5px 15px;
     font-size: 16px;
     margin: 5px;
-    max-width: 75%;
     border-radius: 15px;
     cursor: pointer;
 }
@@ -49,25 +43,61 @@ button {
     gap: 10px;
     justify-content: space-evenly;
     align-items: center;
-    /* margin: 20px; */
 }
-.menu-info-container p {
+.menu-info-container div {
     font-size: 20px;
     margin: 5px;
 }
+#popupDialog {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  padding-top: 150px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+.popupDialog-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+#popupDialog-text {
+  font-size: 20px;
+  color: black;
+}
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
 #cards { /* Cards Styling Beyond This Point */
-    float:right;
-    margin: 150px 250px 150px 150px;
+    float:left;
+    /* margin: 150px 250px 150px 150px; */
     display: grid;
     gap: 25px 50px;
     grid-template-columns: repeat(5, 50px); /* Creates 5 equal columns */
     grid-template-rows: repeat(5, 100px);
+    margin-top: 50px;
+    margin-left: 120px;
 }
 .card {
     width: 90px;
     height: 120px;
     border-radius: 10px;
-    /* margin: 15px; */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -85,9 +115,9 @@ button {
     /* background-color: #e74c3c;
     color: white; */
     background-color: #fff;
-    color: #e74c3c;
+    color: red;
 }
-.white {
+.black {
     background-color: #fff;
     color: black;
 }

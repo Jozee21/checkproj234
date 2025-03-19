@@ -12,87 +12,71 @@
     8.1. IF NO property matches the chosen card
         9. Player loses
     8.2. IF ANY property matches the chosen card
-        10. Player wins
+       9. Player wins
+
 */
-// Grab references to the HTML elements
 const cards = document.getElementById("cards");
 const betInput = document.getElementById("betinput");
 const betCard = document.getElementById("betcard");
 const betAmount = document.getElementById("betamount");
 const startBtn = document.getElementById("start");
-let balanceAmount = document.getElementById("balanceamount");
 const shuffleBtn = document.getElementById("shuffle");
-// const PotBtn = document.getElementById("fill-the-pot");
-// const potDisplay = document.getElementById("pot");
+var popupDialog = document.getElementById("popupDialog");
+var popupDialogclose = document.getElementsByClassName("close")[0];
+const popupDialogText = document.getElementById("popupDialog-text");
+let cardSelected = false;
+let gameStarted = false;
+let selectedCard = [];
+const suites = ['♠', '♣', '♥', '♦']; // const suites = ['&#9824;', '&#9827;', '&#9829;', '&#9830;']; // all that hard work for nothing LUL
+const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+const deck = [];
+let balanceAmount = document.getElementById("balanceamount");
+betAmount.innerText = "0"
+balanceAmount.innerText = "0"
+  
+popupDialogclose.onclick = function() {
+    popupDialog.style.display = "none";
+}
 
-// used Canvas to create the ball and the 5x5 grid
-const canvas = document.createElement("canvas");
-canvas.id = "DropBallCanvas";
+window.onclick = function(event) {
+    if (event.target == popupDialog) {
+        popupDialog.style.display = "none";
+    }
+}
+const orderedGen = () => { // START UP, EVERYTHING IS ORDERED, PLAYER CHOOSES A CARD FROM HERE
+    cards.innerHTML = ``;
+    deck.length = 0;
+    for(let i = 0;i < values.length*2;i++) {
+        const orderColor = i > 12 ? 'black' : 'red';
+        const orderSuite = i % suites.length;
+        const orderValue = i % 13;
+        deck.push({
+            color: orderColor,
+            suite: suites[orderSuite],
+            value: values[orderValue]
+        });
+        // cards.innerHTML += `<div class="card ${orderColor}">${values[orderValue]}${suites[orderSuite]}</div>`; // DEBUGGING
+    }
+    if (deck.length > 0) { // Remove 1 card
+        const randomIndex = Math.floor(Math.random() * deck.length);
+        deck.splice(randomIndex, 1);
+    }
+    deck.forEach(card => { // Display all cards
+        cards.innerHTML += `<div class="card ${card.color}">${card.value}${card.suite}</div>`;
+    });
+};
+orderedGen();
+
+const canvas = document.getElementById("DropBallCanvas");
+// canvas.id = "DropBallCanvas";
 document.body.appendChild(canvas);
-const ctx = canvas.getContext("2d"); //acts as a empty canva 
-
+const ctx = canvas.getContext("2d");
 canvas.width = 500;
 canvas.height = 500;
 
 const grid5x5 = 5;
 const cellSize = canvas.width / grid5x5;
 
-let cardSelected = false;
-let gameStarted = false;
-let selectedCard = null;
-// let pot = 0;
-
-const suites = ['♠', '♣', '♥', '♦'];
-const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-const deck = [];
-balanceAmount.innerText = "0"
-
-const orderedGen = () => { // START UP, EVERYTHING IS ORDERED, PLAYER CHOOSES A CARD FROM HERE
-    cards.innerHTML = ``;
-    for(let i = 0;i < values.length*2;i++) {
-        const orderColor = i > 12 ? 'white' : 'red';
-        const orderSuite = i % suites.length;
-        const orderValue = i % 13;
-        const CardSuiteAndValue =  `${values[orderValue]}${suites[orderSuite]}`; // combined the orderedValue and ordersuite
-
-        deck.push({
-            color: orderColor,
-            suite: suites[orderSuite],
-            value: values[orderValue],
-            key: CardSuiteAndValue
-        });
-
-        let cardDiv = document.createElement("div"); // create div element to create single playing card
-        cardDiv.classList.add("card", orderColor);
-        cardDiv.innerText = CardSuiteAndValue;
-        cardDiv.addEventListener("click", () => {
-            selectedCard = CardSuiteAndValue;
-            betCard.innerText = selectedCard;
-            cardSelected = true;
-        });
-
-        cards.appendChild(cardDiv);
-    }
-};
-orderedGen();
-
-// const randBall = () => {
-//     const rand = Math.floor(Math.random() * deck.length);
-//     const getRandomcard = deck[rand];
-//     alert(`The ball has dropped and landed on a: ${getRandomcard.value}${getRandomcard.suite}`);
-//     return getRandomcard;
-// }; //// commented out this to replace Math.random to the ball with 5x5 grid
-
-// const didPlayerWin = () => {
-//     const ball = randBall();
-//     if (ball.value === betCard.innerText && ball.suite === betCard.innerText) {
-//         alert("Player wins!");
-//     } else {
-//         alert("Player loses!");
-//     }
-// }
-
-// Draws the 5x5 grid
 function drawthegrid5x5grid(){
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
@@ -107,37 +91,28 @@ function drawthegrid5x5grid(){
         ctx.stroke();
     }
 
-    // text modifier in the 5x5 grid
-    ctx.font = "20px Arial";
+    ctx.font = "50px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    // fills the cell boxes with the cards on the deck 
     for (let row = 0; row < grid5x5; row++) {
         for (let col = 0; col < grid5x5; col++) {
             let card = deck[row * grid5x5 + col];
             let x = col * cellSize + cellSize / 2;
             let y = row * cellSize + cellSize / 2;
 
-            // white background. no to transparent
             ctx.fillStyle = "white";
             ctx.fillRect(col * cellSize + 1, row * cellSize + 1, cellSize - 2, cellSize - 2);
 
-            // fills the grid with the card suite and the card values 
             ctx.fillStyle = "black";
-            ctx.fillStyle = (card.suite === "♦" || card.suite === "♥") ? "red" : "black";
+            ctx.fillStyle = card.color;
             ctx.fillText(`${card.value}${card.suite}`, x, y);
         }
     }
 }
-
-// get direction values by random  
 function getdirection(min, max) {
     return Math.random() * (max - min) + min;
 }
-
-// ball functionalities
-//gets the speed of the ball
 let ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
@@ -148,29 +123,22 @@ let ball = {
     minSpeed: 0.05,
     stopped: false
 };
-
-//when the player resets the game
 function resetBall() {
     ball.x = canvas.width / 2;
     ball.y = canvas.height / 2;
     ball.vx = getdirection(-5, 5);
     ball.vy = getdirection(-7, 7);
     ball.stopped = false;
-}
-
-// the ball properties stuff 
+};
 function drawBall() {
     ctx.fillStyle = "red";
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
     ctx.fill();
-}
-
-//how the ball moves and stuff
+};
 function updateBall() {
     if (ball.stopped) return;
 
-    // ball.vx and ball.vy is the velocity of x and y (i dunno if you get this but yea)
     ball.x += ball.vx;
     ball.y += ball.vy;
 
@@ -184,7 +152,6 @@ function updateBall() {
         ball.vx *= getdirection(0.9, 1.1);
     }
 
-    // the ball's speed decreases as time goes by
     ball.vx *= ball.speedDecay;
     ball.vy *= ball.speedDecay;
 
@@ -192,92 +159,130 @@ function updateBall() {
         ball.vx = 0;
         ball.vy = 0;
         ball.stopped = true;
+        console.log("Ball has stopped.");
         checkWinCondition();
     }
 }
-
-//checking the win conditions
 function checkWinCondition() {
     let col = Math.floor(ball.x / cellSize);
     let row = Math.floor(ball.y / cellSize);
     let landedballCard = deck[row * grid5x5 + col];
 
-    alert(`The ball landed on: ${landedballCard.value}${landedballCard.suite}`);
+    console.log(`Ball landed on: ${landedballCard.value}${landedballCard.suite}`);
 
-    let bet = parseFloat(betAmount.innerText);
-    if (landedballCard.key === selectedCard) {
-        alert("You won!! You have the exact same card as the winning card! Get 2x your money!");
-        // pot += bet * 2;
+    let bet = parseFloat(betInput.value);
+
+    // alert(`The ball landed on: ${landedballCard.value}${landedballCard.suite}`);
+    popupDialog.style.display = "block";
+    if (landedballCard.value === selectedCard[0] && landedballCard.suite === selectedCard[1]) {
+        popupDialogText.innerText = `It landed on ${landedballCard.value}${landedballCard.suite}! You won! You have the exact same card as the winning card! Get 2x your money!`;
         balanceAmount.innerText = parseFloat(balanceAmount.innerText) + bet * 2;
-    } else if (landedballCard.value === selectedCard[0] && landedballCard.suite !== selectedCard[1]) {
-        alert("You won! You have the same card value! Get 1.5 your money!");
-        // pot += bet * 1.5;
+    } else if (landedballCard.value === selectedCard[0]) {
+        popupDialogText.innerText = `It landed on ${landedballCard.value}${landedballCard.suite}! You won! You have the same card value! Get 1.5 your money!`;
         balanceAmount.innerText = parseFloat(balanceAmount.innerText) + bet * 1.5;
-    } else if (landedballCard.suite === selectedCard[1] && landedballCard.value !== selectedCard[0]) {
-        alert("You won! You have the same card suite! We just give you back your own money");
-        // pot += bet * 1;
-        balanceAmount.innerText = parseFloat(balanceAmount.innerText) + bet
+    } else if (landedballCard.suite === selectedCard[1]) {
+        popupDialogText.innerText = `It landed on ${landedballCard.value}${landedballCard.suite}! You won! You have the same card suite! Get 1.2 your money!`;  
+        balanceAmount.innerText = parseFloat(balanceAmount.innerText) + bet * 1.2;
     } else {
-        alert("You lost! Gimme your money. Try again?");
-    }    balanceAmount.innerText = parseFloat(balanceAmount.innerText) - bet
+        popupDialogText.innerText = `It landed on ${landedballCard.value}${landedballCard.suite}! You lose! Try again`;
+        balanceAmount.innerText = parseFloat(balanceAmount.innerText) - bet;
 
-    //after the game, the pot subtracts to the bet
-    // potDisplay.innerText = `$${pot}`;
-
-    // resets the game
-    cardSelected = false;
-    selectedCard = null;
-    betAmount.innerText = "";
-    betCard.innerText = "";
+    }
+    betInput.disabled = false;
+    gameStarted = false;
 }
-
-// for smoother game performance
 let lastTime = performance.now();
 function animate() {
     let currentTime = performance.now();
     let deltaTime = currentTime - lastTime;
     lastTime = currentTime;
 
-    // 5x5 grid function and the ball is called
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawthegrid5x5grid();
     updateBall(deltaTime);
     drawBall();
     requestAnimationFrame(animate);
 }
-
-startBtn.addEventListener("click", () => { // LE STARTO BUTONNES, HOLA CHIKO, LET'S GO!
+startBtn.addEventListener("click", () => { // BUTTONS, HOLA CHICO, VAVANOS!
     let bet = parseFloat(betInput.value);
+    if (isNaN(bet)) {
+        alert("Bet must be a number!")
+        return
+    }
 
-    // if (pot <= 0) {
-    //     alert("You need to fill the pot first!");
-    //     return;
-    // }
-
-    if (bet > 0) { 
-        betAmount.innerText = bet;
-        // pot -= bet; // deduct money from pot
-        // potDisplay.innerText = `$${pot}`; // display the new pot amount
-        if (cardSelected) {
-            gameStarted = true;
-            resetBall();
-            animate();
-        } else {
-            alert("A card must be selected!");
+    if (gameStarted) {
+        popupDialog.style.display = "block";
+        popupDialogText.innerText = "Game currently ongoing.";
+        return  
+    }
+    if (!(bet > 0)) {
+        alert("Bet must be higher than 0!")
+        return
+        
+    } 
+    betAmount.innerText = bet;
+    if (!cardSelected) {
+        alert("A card must be selected!") 
+        return
+        
+    }
+    betInput.disabled = true; 
+    gameStarted = true;
+    resetBall();
+    animate();
+});
+betInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        let bet = parseFloat(betInput.value);
+    
+        if (isNaN(bet)) {
+            alert("Bet must be a number!")
+            return
         }
+    
+        if (gameStarted) {
+            popupDialog.style.display = "block";
+            popupDialogText.innerText = "Game currently ongoing.";
+            return  
+        }
+        if (!(bet > 0)) {
+            alert("Bet must be higher than 0!")
+            return
+            
+        } 
+        betAmount.innerText = bet;
+        if (!cardSelected) {
+            alert("A card must be selected!") 
+            return
+            
+        } 
+        betInput.disabled = true;
+        gameStarted = true;
+        resetBall();
+        animate();
+    }
+})
+shuffleBtn.addEventListener("click", () => {
+    if (!gameStarted) {
+        orderedGen();
     } else {
-        alert("Bet must be higher than 0!");
+        popupDialog.style.display = "block";
+        popupDialogText.innerText = "Game currently ongoing.";
     }
 });
-
-//pot of greed input function
-// PotBtn.addEventListener("click", () => {
-//     let amount = parseFloat(prompt("Enter the desired amount: "));
-//     if (!isNaN(amount) && amount > 0) {
-//         pot += amount;
-//         potDisplay.innerText = `$${pot}`;
-//         alert(`Added $${amount} to the pot!`);
-//     } else {
-//         alert("Invalid amount! Please enter any amount that you have!");
-//     }
-// });
+cards.addEventListener("click", (e) => { // A IS CARD IS CLICKED, IT IS RECORDED IN THE SYSTEM
+    if (e.target.classList.contains("card")) {
+        if (gameStarted) {
+            popupDialog.style.display = "block";
+            popupDialogText.innerText = "NO CHEATING! >:3c";
+            return;
+        }
+        cardSelected = true;
+        selectedCard = e.target.innerText;
+        betCard.innerText = `${selectedCard}`;
+        console.log(`Selected card: ${selectedCard}`);
+        const cardText = e.target.innerText;
+        selectedCard = deck.find(card => `${card.value}${card.suite}` === cardText);
+        selectedCard = [selectedCard.value, selectedCard.suite];
+    }
+});
