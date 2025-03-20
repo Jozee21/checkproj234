@@ -20,6 +20,7 @@ const betInput = document.getElementById("betinput");
 const betCard = document.getElementById("betcard");
 const betAmount = document.getElementById("betamount");
 const startBtn = document.getElementById("start");
+const ruleBtn = document.getElementById("rules");
 const shuffleBtn = document.getElementById("shuffle");
 var popupDialog = document.getElementById("popupDialog");
 var popupDialogclose = document.getElementsByClassName("close")[0];
@@ -46,8 +47,16 @@ window.onclick = function(event) {
 const orderedGen = () => { // START UP, EVERYTHING IS ORDERED, PLAYER CHOOSES A CARD FROM HERE
     cards.innerHTML = ``;
     deck.length = 0;
-    for(let i = 0;i < values.length*2;i++) {
-        const orderColor = i > 12 ? 'black' : 'red';
+    for (let i = 0; i < values.length * 2; i++) {
+        let orderColor = 'black'; 
+
+
+        if (i % 4 === 0 || i % 4 === 1) {
+            orderColor = 'black';
+        } else {
+            orderColor = 'red';
+        }
+
         const orderSuite = i % suites.length;
         const orderValue = i % 13;
         deck.push({
@@ -55,12 +64,13 @@ const orderedGen = () => { // START UP, EVERYTHING IS ORDERED, PLAYER CHOOSES A 
             suite: suites[orderSuite],
             value: values[orderValue]
         });
-        // cards.innerHTML += `<div class="card ${orderColor}">${values[orderValue]}${suites[orderSuite]}</div>`; // DEBUGGING
     }
+    
     if (deck.length > 0) { // Remove 1 card
         const randomIndex = Math.floor(Math.random() * deck.length);
         deck.splice(randomIndex, 1);
     }
+
     deck.forEach(card => { // Display all cards
         cards.innerHTML += `<div class="card ${card.color}">${card.value}${card.suite}</div>`;
     });
@@ -186,7 +196,6 @@ function checkWinCondition() {
     } else {
         popupDialogText.innerText = `It landed on ${landedballCard.value}${landedballCard.suite}! You lose! Try again`;
         balanceAmount.innerText = parseFloat(balanceAmount.innerText) - bet;
-
     }
     betInput.disabled = false;
     gameStarted = false;
@@ -265,6 +274,13 @@ betInput.addEventListener("keydown", (e) => {
 shuffleBtn.addEventListener("click", () => {
     if (!gameStarted) {
         orderedGen();
+        betCard.innerText = "";
+        cardSelected = false;
+        const previousSelectedCard = document.querySelector(".selected-card");
+        if (previousSelectedCard) {
+            previousSelectedCard.classList.remove("selected-card");
+        }
+
     } else {
         popupDialog.style.display = "block";
         popupDialogText.innerText = "Game currently ongoing.";
@@ -277,12 +293,29 @@ cards.addEventListener("click", (e) => { // A IS CARD IS CLICKED, IT IS RECORDED
             popupDialogText.innerText = "NO CHEATING! >:3c";
             return;
         }
+
+        const previousSelectedCard = document.querySelector(".selected-card");
+        if (previousSelectedCard) {
+            previousSelectedCard.classList.remove("selected-card");
+        }
+
         cardSelected = true;
         selectedCard = e.target.innerText;
         betCard.innerText = `${selectedCard}`;
+        e.target.classList.add("selected-card");
         console.log(`Selected card: ${selectedCard}`);
         const cardText = e.target.innerText;
         selectedCard = deck.find(card => `${card.value}${card.suite}` === cardText);
         selectedCard = [selectedCard.value, selectedCard.suite];
+    }
+});
+
+ruleBtn.addEventListener("click", () => {
+    if (!gameStarted) {
+        popupDialog.style.display = "block";
+        popupDialogText.innerText = "1. Player places a bet, it must be higher than 0. \n 2. Player chooses a card from the cards section. (2-10, A, J, Q, K). \n 3. Player should press the 'Bet & Start' button, and will only proceed when a proper bet is placed and a card is chosen. \n 4. Check for matching properties (Number, Suite) \n 4.1  IF NO property matches the chosen card (number and suite is different), Player loses. \n 4.2 IF ANY property matches the chosen card \n  a) Player wins, if the chosen card is the same card (number and suite); gets 2x the reward \n b)Player wins, if the chosen card is the same number but different suite; gets 1.5x the reward \n c)Player wins, if the chosen card is the same suite but different number; gets 1.2x the reward ";
+    } else {
+        popupDialog.style.display = "block";
+        popupDialogText.innerText = "Game currently ongoing.";
     }
 });
